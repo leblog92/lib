@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Library Idle — Librarian Simulator</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa8b2; --accent:#f59e0b; --glass:rgba(255,255,255,0.04);
+      --accent-2:#60a5fa; --success:#10b981;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:linear-gradient(180deg,#071226 0%, #081426 60%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      display:flex; align-items:center; justify-content:center; padding:32px;
+    }
+    .app{
+      width:100%; max-width:1100px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+      display:grid; grid-template-columns: 360px 1fr; gap:20px;
+    }
+    header{grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    header h1{font-size:20px; margin:0}
+    header p{margin:0; color:var(--muted); font-size:13px}
+
+    .panel{background:var(--card); border-radius:12px; padding:16px; border:1px solid var(--glass);}
+    .stats{display:flex; flex-direction:column; gap:12px}
+    .stat{display:flex; align-items:center; justify-content:space-between;}
+    .stat .label{color:var(--muted); font-size:13px}
+    .big{font-size:22px; font-weight:700}
+
+    .main-area{display:flex; flex-direction:column; gap:14px}
+    .shelf{height:220px; background:linear-gradient(180deg,#071526, #092033); border-radius:10px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden}
+    .shelf .books{display:flex; gap:6px; transform:translateY(6px)}
+    .book{width:18px; height:56px; border-radius:3px; box-shadow:0 2px 6px rgba(0,0,0,0.6)}
+    .book:hover{transform:translateY(-6px)}
+
+    .controls{display:flex; gap:12px; align-items:center}
+    .btn{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); padding:10px 14px; border-radius:10px; cursor:pointer; color:inherit}
+    .btn:active{transform:translateY(1px)}
+
+    .upgrades{display:grid; gap:10px; margin-top:6px}
+    .upgrade{display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:10px; background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent); border:1px solid rgba(255,255,255,0.02)}
+    .upgrade .meta{display:flex; gap:10px; align-items:center}
+    .small{font-size:12px; color:var(--muted)}
+
+    .footer{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px}
+
+    .log{max-height:120px; overflow:auto; padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); font-size:13px}
+    .log p{margin:6px 0; color:var(--muted)}
+
+    .row{display:flex; gap:10px}
+    .flex-1{flex:1}
+    .muted{color:var(--muted)}
+
+    .ticker{font-size:13px; color:var(--accent-2); font-weight:600}
+    .buy{background:linear-gradient(90deg,var(--accent), #fbbf24); color:#081225}
+    .disabled{opacity:0.45; pointer-events:none}
+
+    /* responsive */
+    @media (max-width:900px){.app{grid-template-columns:1fr; padding:12px}.shelf{height:160px}}
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <header>
+      <div>
+        <h1>Library Idle — You're the Head Librarian</h1>
+        <p>Process books, help visitors, hire assistants and grow your library!</p>
+      </div>
+      <div style="text-align:right">
+        <div class="muted">Version 1.0</div>
+        <div class="small muted" id="timeSince">—</div>
+      </div>
+    </header>
+
+    <aside class="panel">
+      <div class="stats">
+        <div class="stat"><div class="label">Books Processed</div><div class="big" id="books">0</div></div>
+        <div class="stat"><div class="label">Books / sec</div><div class="big" id="bps">0</div></div>
+        <div class="stat"><div class="label">Visitors waiting</div><div class="big" id="visitors">0</div></div>
+        <div class="stat"><div class="label">Assistants</div><div class="big" id="assistants">0</div></div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="small muted">Upgrades</div>
+      <div class="upgrades" id="upgradesList"></div>
+
+      <div style="height:12px"></div>
+      <div class="small muted">Log</div>
+      <div class="log" id="log"></div>
+
+      <div class="footer">
+        <button class="btn" id="exportBtn">Export</button>
+        <button class="btn" id="importBtn">Import</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </aside>
+
+    <main class="main-area panel">
+      <div class="shelf" id="shelf">
+        <div class="books" id="bookshelf"></div>
+        <div style="position:absolute; bottom:12px; left:12px; text-shadow:0 2px 8px rgba(0,0,0,0.6)">
+          <div class="ticker">The reading room is peaceful...</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div style="display:flex; flex-direction:column">
+          <button class="btn buy" id="processBtn">Process Book (click)</button>
+          <div class="small muted" style="margin-top:6px">Each click processes 1 book (+ bonuses)</div>
+        </div>
+
+        <div class="panel" style="flex:1">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div><strong>Visitors</strong><div class="small muted">Visitors arrive over time; each wants a book processed.</div></div>
+            <div><button class="btn" id="serveBtn">Serve visitor</button></div>
+          </div>
+          <div style="height:8px"></div>
+          <div style="display:flex; gap:8px">
+            <div class="small muted">Auto-tick: <span id="tickRate">1s</span></div>
+            <div class="small muted">Save: <span id="saveInterval">5s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:flex-start">
+        <div class="panel" style="flex:1">
+          <h3 style="margin:0 0 8px 0">Library Growth</h3>
+          <p class="small muted">Spend books to unlock helpers and upgrades that increase processing speed and attract more visitors.</p>
+          <div style="height:8px"></div>
+          <div id="store" style="display:grid; gap:8px"></div>
+        </div>
+
+        <div class="panel" style="width:260px">
+          <h3 style="margin:0 0 8px 0">Achievements</h3>
+          <div id="achievements" class="small muted">None yet</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // -- Game state --
+    const SAVE_KEY = 'library_idle_v1';
+    const DEFAULT = {
+      books: 0,
+      bps: 0,
+      visitors: 0,
+      assistants: 0,
+      upgrades: {},
+      lastTick: Date.now(),
+      startedAt: Date.now(),
+      achievements: {},
+    };
+
+    let state = load() || DEFAULT;
+
+    // store DOM refs
+    const el = id => document.getElementById(id);
+    const booksEl = el('books'), bpsEl = el('bps'), visitorsEl = el('visitors'), assistantsEl = el('assistants');
+    const bookshelf = el('bookshelf'), shelf = el('shelf');
+    const logEl = el('log'), upgradesList = el('upgradesList'), storeEl = el('store'), achievementsEl = el('achievements');
+
+    const baseUpgrades = [
+      {id:'assistant', title:'Hire Assistant', desc:'Each assistant processes 0.5 book/sec automatically.', baseCost:25, bps:0.5},
+      {id:'shelf', title:'Add Shelving', desc:'Increase capacity, attract more visitors (visitors +1).', baseCost:60, visitors:1},
+      {id:'automation', title:'Catalog Automation', desc:'Increase processing speed by 2x.', baseCost:250, multiplier:2},
+      {id:'community', title:'Community Events', desc:'Doubles visitor arrival rate.', baseCost:600, visitorMultiplier:2},
+      {id:'archive', title:'Archive System', desc:'Assistants are 2x effective.', baseCost:1500, assistantMultiplier:2},
+    ];
+
+    // store items (spend books to buy)
+    const shop = [
+      {id:'assistant_1', title:'Junior Assistant', desc:'Hire a human helper', cost:25, effect:() => buyAssistant(1)},
+      {id:'assistant_5', title:'Team of Assistants', desc:'Hire 5 assistants', cost:110, effect:() => buyAssistant(5)},
+      {id:'shelf_1', title:'New Bookshelf', desc:'Attracts +2 visitors', cost:60, effect:() => changeVisitors(2)},
+      {id:'automation_1', title:'Basic Catalog Script', desc:'x1.5 processing speed', cost:220, effect:() => applyUpgrade('automation', 1.5)},
+      {id:'donation', title:'Community Donation', desc:'Gain 400 books instantly', cost:0, effect:()=>{state.books+=400; log('Donation: +400 books')}}
+    ];
+
+    // helpers
+    function fmt(n){return Math.floor(n).toLocaleString()}
+    function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
+    function load(){ try{ const s = localStorage.getItem(SAVE_KEY); if(!s) return null; return JSON.parse(s);}catch(e){return null}};
+
+    function log(msg){ const p = document.createElement('p'); p.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; logEl.prepend(p); if(logEl.children.length>200) logEl.removeChild(logEl.lastChild); }
+
+    // UI wiring
+    el('processBtn').addEventListener('click', ()=>{ processBook(1); animateBook(); });
+    el('serveBtn').addEventListener('click', ()=>serveVisitor());
+    el('resetBtn').addEventListener('click', ()=>{ if(confirm('Reset your game?')){ localStorage.removeItem(SAVE_KEY); state=JSON.parse(JSON.stringify(DEFAULT)); reloadUI(); log('Game reset'); } });
+    el('exportBtn').addEventListener('click', ()=>{ navigator.clipboard.writeText(JSON.stringify(state)); alert('Game state copied to clipboard'); });
+    el('importBtn').addEventListener('click', ()=>{ const raw = prompt('Paste state JSON'); try{ const s = JSON.parse(raw); state = s; save(); reloadUI(); alert('Imported!'); }catch(e){alert('Invalid JSON')} });
+
+    // build upgrades UI
+    function renderUpgrades(){ upgradesList.innerHTML=''; baseUpgrades.forEach(u=>{
+      const row = document.createElement('div'); row.className='upgrade';
+      const meta = document.createElement('div'); meta.className='meta';
+      meta.innerHTML = `<div style="font-weight:700">${u.title}</div><div class="small muted">${u.desc}</div>`;
+      const buy = document.createElement('div'); const cost = calcUpgradeCost(u.id, u.baseCost);
+      const btn = document.createElement('button'); btn.className='btn'; btn.textContent = 'Buy: '+fmt(cost);
+      if((state.books||0) < cost) btn.classList.add('disabled');
+      btn.addEventListener('click', ()=>{ if(state.books < cost) return; state.books -= cost; state.upgrades[u.id]=(state.upgrades[u.id]||0)+1; applyUpgradeEffects(u); save(); reloadUI(); log('Bought '+u.title); });
+      buy.appendChild(btn);
+      row.appendChild(meta); row.appendChild(buy); upgradesList.appendChild(row);
+    })}
+
+    function calcUpgradeCost(id, base){ const level = (state.upgrades && state.upgrades[id]) || 0; return Math.ceil(base * Math.pow(1.8, level)); }
+
+    function applyUpgradeEffects(u){ const lvl = state.upgrades[u.id]; // apply simple effects
+      if(u.bps) state.bps += u.bps;
+      if(u.visitors) state.visitors += u.visitors;
+      if(u.multiplier) { state.bps *= u.multiplier; }
+      if(u.assistantMultiplier){ // mark a multiplier in meta
+        state.assistantMultiplier = (state.assistantMultiplier || 1) * u.assistantMultiplier;
+      }
+    }
+
+    // store UI
+    function renderStore(){ storeEl.innerHTML=''; shop.forEach(item=>{
+      const node = document.createElement('div'); node.className='upgrade';
+      node.innerHTML = `<div style="max-width:200px"><div style="font-weight:700">${item.title}</div><div class="small muted">${item.desc}</div></div>`;
+      const btn = document.createElement('button'); btn.className='btn buy'; btn.textContent = fmt(item.cost);
+      if(state.books < item.cost) btn.classList.add('disabled');
+      btn.addEventListener('click', ()=>{ if(state.books < item.cost) return; state.books -= item.cost; item.effect(); save(); reloadUI(); log('Bought '+item.title); });
+      node.appendChild(btn); storeEl.appendChild(node);
+    })}
+
+    // actions
+    function processBook(n){ const bonus = 0; // future: add multipliers
+      state.books += n; tickUI(); }
+    function buyAssistant(n){ state.assistants += n; state.bps += 0.5 * n * (state.assistantMultiplier || 1); }
+    function changeVisitors(n){ state.visitors += n }
+    function applyUpgrade(id, factor){ state.bps *= factor }
+
+    function serveVisitor(){ if(state.visitors <= 0){ log('No visitors to serve'); return } state.visitors--; const reward = 3 + Math.floor(Math.random()*6); state.books += reward; log('Served a visitor — +' + reward + ' books'); save(); reloadUI(); }
+
+    // automatic tick
+    let tickInterval = 1000; // ms
+    function tick(elapsedSecs){ // called every tickInterval
+      // visitors arrival
+      const arrival = Math.random() < 0.23 ? 1 : 0; // ~1 every 4 secs baseline
+      if(Math.random() < (0.23 * (state.upgrades.community || 1))){
+        state.visitors += 1;
+      }
+      // assistants
+      const auto = (state.assistants || 0) * 0.5 * (state.assistantMultiplier||1);
+      const manualBps = (state.bps || 0);
+      const totalPerSec = manualBps + auto;
+      state.books += totalPerSec * (elapsedSecs||1);
+      // occasional events
+      if(Math.random() < 0.02) { const bonus = 10 + Math.floor(Math.random()*30); state.books += bonus; log('Found a donation box: +' + bonus + ' books'); }
+      save(); reloadUI();
+    }
+
+    // render bookshelf
+    function animateBook(){ const b = document.createElement('div'); b.className='book'; b.style.background = randomBookColor(); b.style.opacity=0; bookshelf.appendChild(b);
+      requestAnimationFrame(()=>{ b.style.transition='transform 600ms ease, opacity 500ms'; b.style.opacity=1; b.style.transform='translateY(-40px)'; setTimeout(()=>{ b.style.opacity=0; b.style.transform='translateY(-80px)'; setTimeout(()=>b.remove(),700); },600); }); }
+
+    function randomBookColor(){ const palette = ['#f97316','#f59e0b','#ef4444','#34d399','#60a5fa','#a78bfa','#fb7185','#f97316','#fcd34d']; return palette[Math.floor(Math.random()*palette.length)]; }
+
+    function reloadUI(){ // update UI elements
+      booksEl.textContent = fmt(state.books);
+      bpsEl.textContent = formatFloat((state.bps || 0) + (state.assistants||0)*0.5*(state.assistantMultiplier||1));
+      visitorsEl.textContent = fmt(state.visitors || 0);
+      assistantsEl.textContent = fmt(state.assistants || 0);
+      renderUpgrades(); renderStore(); renderAchievements(); updateTimeSince(); }
+
+    function formatFloat(n){ if(n<0.01) return '0'; return (Math.round(n*100)/100).toLocaleString(); }
+
+    function renderAchievements(){ const a = state.achievements || {}; const items = [];
+      if(state.books >= 100 && !a['100_books']){ a['100_books']=true; state.achievements=a; log('Achievement: 100 books processed!'); }
+      if(state.assistants >= 5 && !a['5_assistants']){ a['5_assistants']=true; log('Achievement: Team formed — 5 assistants'); }
+      const earned = Object.keys(a).length; achievementsEl.textContent = earned ? Object.keys(a).join(', ') : 'None yet'; }
+
+    // offline progress
+    function applyOfflineGain(){ const now = Date.now(); const last = state.lastTick || now; const seconds = Math.floor((now - last)/1000);
+      if(seconds <= 0) return;
+      const auto = (state.assistants||0)*0.5*(state.assistantMultiplier||1);
+      const perSec = (state.bps||0) + auto;
+      const gained = perSec * seconds;
+      if(gained > 0){ state.books += gained; log('While you were away: +' + Math.floor(gained) + ' books ( '+seconds+'s )'); }
+      state.lastTick = now; save(); }
+
+    // small helpers
+    function updateTimeSince(){ const started = new Date(state.startedAt); const diff = Math.floor((Date.now() - started)/1000); const days = Math.floor(diff/86400); const hours = Math.floor((diff%86400)/3600); el('timeSince').textContent = `Playing for ${days}d ${hours}h`; }
+
+    // main loop
+    let last = Date.now(); applyOfflineGain(); reloadUI();
+    setInterval(()=>{
+      const now = Date.now(); const elapsed = Math.max(1, Math.floor((now - last)/1000)); last = now;
+      tick(elapsed);
+    }, tickInterval);
+
+    // periodic save
+    setInterval(()=>{ state.lastTick = Date.now(); save(); }, 5000);
+
+    // init books on click to show some visuals
+    for(let i=0;i<20;i++){ const d = document.createElement('div'); d.className='book'; d.style.background = randomBookColor(); d.style.height = (30 + Math.random()*70) + 'px'; d.style.width = (12 + Math.random()*8) + 'px'; bookshelf.appendChild(d); }
+
+    // utilities
+    function reload(){ location.reload() }
+
+    // expose to console for power users
+    window.GAME = {state, save, load, log, processBook};
+  </script>
+</body>
+</html>
