@@ -9,460 +9,83 @@
 <title>Inventaire RFID Bibliothèque</title>
 <style>
   :root {
-    --bg: #0f1729;
-    --bg2: #1a2744;
-    --bg3: #243060;
-    --accent: #4e9eff;
-    --accent2: #2de0b5;
-    --text: #e8edf8;
-    --text2: #8fa3c8;
-    --danger: #ff4e6a;
-    --success: #2de0b5;
-    --warn: #ffb84e;
+    --bg: #0f1729; --bg2: #1a2744; --bg3: #243060;
+    --accent: #4e9eff; --accent2: #2de0b5;
+    --text: #e8edf8; --text2: #8fa3c8;
+    --danger: #ff4e6a; --success: #2de0b5; --warn: #ffb84e;
     --border: rgba(78,158,255,0.2);
-    --card-radius: 16px;
-    --font: 'Courier New', monospace;
+    --card-radius: 16px; --font: 'Courier New', monospace;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Header */
-  header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  header h1 {
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text);
-    line-height: 1.2;
-  }
-
-  header p {
-    font-size: 10px;
-    color: var(--text2);
-    letter-spacing: 0.05em;
-  }
-
-  .status-badge {
-    margin-left: auto;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border: 1px solid;
-  }
-
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; flex-direction: column; user-select: none; -webkit-tap-highlight-color: transparent; }
+  header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+  .logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  header h1 { font-size: 14px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.2; }
+  header p { font-size: 10px; color: var(--text2); letter-spacing: 0.05em; }
+  .status-badge { margin-left: auto; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid; }
   .status-badge.ok { color: var(--success); border-color: var(--success); background: rgba(45,224,181,0.1); }
   .status-badge.warn { color: var(--warn); border-color: var(--warn); background: rgba(255,184,78,0.1); }
   .status-badge.err { color: var(--danger); border-color: var(--danger); background: rgba(255,78,106,0.1); }
-
-  /* Main */
-  main {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  /* Session info bar */
-  .session-bar {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .session-bar .info-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .session-bar .info-item span:first-child {
-    font-size: 10px;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .session-bar .info-item span:last-child {
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--accent);
-  }
-
-  /* Scan zone */
-  .scan-zone {
-    background: var(--bg2);
-    border: 2px dashed var(--border);
-    border-radius: var(--card-radius);
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .scan-zone.scanning {
-    border-color: var(--accent);
-    border-style: solid;
-    background: rgba(78,158,255,0.05);
-  }
-
-  .scan-zone.success {
-    border-color: var(--success);
-    border-style: solid;
-    background: rgba(45,224,181,0.05);
-  }
-
-  .scan-zone.duplicate {
-    border-color: var(--warn);
-    border-style: solid;
-    background: rgba(255,184,78,0.05);
-  }
-
-  .scan-zone.error {
-    border-color: var(--danger);
-    border-style: solid;
-    background: rgba(255,78,106,0.05);
-  }
-
-  /* Pulse animation */
-  @keyframes pulse-ring {
-    0% { transform: scale(0.8); opacity: 0.8; }
-    100% { transform: scale(1.4); opacity: 0; }
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .rfid-icon {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .rfid-icon svg {
-    width: 60px;
-    height: 60px;
-    transition: all 0.3s;
-  }
-
-  .pulse-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid var(--accent);
-    opacity: 0;
-    display: none;
-  }
-
-  .scanning .pulse-ring {
-    display: block;
-    animation: pulse-ring 1.4s ease-out infinite;
-  }
-
+  main { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; max-width: 600px; margin: 0 auto; width: 100%; }
+  .session-bar { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .session-bar .info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .session-bar .info-item span:first-child { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .session-bar .info-item span:last-child { font-size: 18px; font-weight: bold; color: var(--accent); }
+  .scan-zone { background: var(--bg2); border: 2px dashed var(--border); border-radius: var(--card-radius); padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; }
+  .scan-zone.scanning { border-color: var(--accent); border-style: solid; background: rgba(78,158,255,0.05); }
+  .scan-zone.success { border-color: var(--success); border-style: solid; background: rgba(45,224,181,0.05); }
+  .scan-zone.duplicate { border-color: var(--warn); border-style: solid; background: rgba(255,184,78,0.05); }
+  .scan-zone.error { border-color: var(--danger); border-style: solid; background: rgba(255,78,106,0.05); }
+  @keyframes pulse-ring { 0%{transform:scale(0.8);opacity:0.8} 100%{transform:scale(1.4);opacity:0} }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .rfid-icon { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+  .rfid-icon svg { width: 60px; height: 60px; }
+  .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; display: none; }
+  .scanning .pulse-ring { display: block; animation: pulse-ring 1.4s ease-out infinite; }
   .scanning .pulse-ring:nth-child(2) { animation-delay: 0.4s; }
   .scanning .pulse-ring:nth-child(3) { animation-delay: 0.8s; }
-
-  .scan-label {
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text2);
-    text-align: center;
-  }
-
+  .scan-label { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); text-align: center; }
   .scanning .scan-label { color: var(--accent); animation: blink 1.2s ease infinite; }
   .success .scan-label { color: var(--success); }
   .duplicate .scan-label { color: var(--warn); }
   .error .scan-label { color: var(--danger); }
-
-  .last-scan {
-    font-size: 11px;
-    color: var(--text2);
-    text-align: center;
-    min-height: 16px;
-    font-family: monospace;
-    letter-spacing: 0.05em;
-  }
-
-  /* Control buttons */
-  .controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .btn {
-    padding: 14px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 12px;
-    font-weight: bold;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-    -webkit-appearance: none;
-  }
-
+  .last-scan { font-size: 11px; color: var(--text2); text-align: center; min-height: 16px; font-family: monospace; letter-spacing: 0.05em; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { padding: 14px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font-family: var(--font); font-size: 12px; font-weight: bold; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; -webkit-appearance: none; }
   .btn:active { transform: scale(0.96); }
-
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0f1729;
-    grid-column: 1 / -1;
-  }
-
-  .btn.primary.active {
-    background: var(--danger);
-    border-color: var(--danger);
-    color: white;
-  }
-
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #0f1729; grid-column: 1 / -1; }
+  .btn.primary.active { background: var(--danger); border-color: var(--danger); color: white; }
   .btn.danger { border-color: var(--danger); color: var(--danger); }
   .btn.success { border-color: var(--success); color: var(--success); }
-
-  .btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  /* Log list */
-  .log-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4px;
-  }
-
-  .log-header h2 {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text2);
-  }
-
-  .log-count {
-    font-size: 11px;
-    color: var(--accent2);
-    font-weight: bold;
-  }
-
-  .log-list {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    overflow: hidden;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  .log-empty {
-    padding: 32px 20px;
-    text-align: center;
-    color: var(--text2);
-    font-size: 12px;
-    letter-spacing: 0.06em;
-  }
-
-  .log-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(78,158,255,0.08);
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .log-header { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+  .log-header h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text2); }
+  .log-count { font-size: 11px; color: var(--accent2); font-weight: bold; }
+  .log-list { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-radius); overflow: hidden; max-height: 300px; overflow-y: auto; }
+  .log-empty { padding: 32px 20px; text-align: center; color: var(--text2); font-size: 12px; letter-spacing: 0.06em; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .log-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid rgba(78,158,255,0.08); animation: fadeIn 0.3s ease; }
   .log-item:last-child { border-bottom: none; }
-
-  .log-num {
-    font-size: 10px;
-    color: var(--text2);
-    min-width: 24px;
-    text-align: right;
-  }
-
-  .log-ref {
-    flex: 1;
-    font-size: 13px;
-    font-family: monospace;
-    color: var(--text);
-    word-break: break-all;
-    letter-spacing: 0.04em;
-  }
-
-  .log-time {
-    font-size: 10px;
-    color: var(--text2);
-    white-space: nowrap;
-  }
-
-  .log-del {
-    background: none;
-    border: none;
-    color: var(--danger);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 2px 4px;
-    opacity: 0.5;
-    transition: opacity 0.2s;
-  }
-
+  .log-num { font-size: 10px; color: var(--text2); min-width: 24px; text-align: right; }
+  .log-ref { flex: 1; font-size: 13px; font-family: monospace; color: var(--text); word-break: break-all; letter-spacing: 0.04em; }
+  .log-time { font-size: 10px; color: var(--text2); white-space: nowrap; }
+  .log-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding: 2px 4px; opacity: 0.5; transition: opacity 0.2s; }
   .log-del:active { opacity: 1; }
-
-  /* Footer actions */
-  .footer-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding-bottom: 20px;
-  }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 10px 20px;
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    color: var(--text);
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 999;
-    white-space: nowrap;
-    max-width: 90vw;
-    text-align: center;
-  }
-
+  .footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 20px; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg3); border: 1px solid var(--border); border-radius: 24px; padding: 10px 20px; font-size: 12px; letter-spacing: 0.06em; color: var(--text); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* Compat warning */
-  .compat-warn {
-    background: rgba(255,184,78,0.1);
-    border: 1px solid rgba(255,184,78,0.4);
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 12px;
-    color: var(--warn);
-    line-height: 1.6;
-    letter-spacing: 0.04em;
-  }
-
+  .compat-warn { background: rgba(255,184,78,0.1); border: 1px solid rgba(255,184,78,0.4); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--warn); line-height: 1.6; letter-spacing: 0.04em; }
   .compat-warn strong { display: block; margin-bottom: 4px; font-size: 13px; }
-
-  /* Scrollbar */
   .log-list::-webkit-scrollbar { width: 4px; }
   .log-list::-webkit-scrollbar-track { background: transparent; }
   .log-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-  /* Manual input */
-  .manual-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .manual-input {
-    flex: 1;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-family: monospace;
-    font-size: 13px;
-    outline: none;
-    -webkit-appearance: none;
-  }
-
-  .manual-input:focus {
-    border-color: var(--accent);
-  }
-
-  .manual-input::placeholder {
-    color: var(--text2);
-    font-size: 12px;
-  }
+  .manual-row { display: flex; gap: 8px; }
+  .manual-input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: monospace; font-size: 13px; outline: none; -webkit-appearance: none; }
+  .manual-input:focus { border-color: var(--accent); }
+  .manual-input::placeholder { color: var(--text2); font-size: 12px; }
+  details.debug-panel { background: rgba(0,0,0,0.3); border: 1px solid rgba(78,158,255,0.15); border-radius: 10px; padding: 10px 14px; font-size: 10px; color: var(--text2); font-family: monospace; line-height: 1.8; }
+  details.debug-panel summary { cursor: pointer; color: var(--text2); font-size: 10px; letter-spacing: 0.08em; }
+  .debug-content { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -471,50 +94,33 @@
   <div class="logo">📚</div>
   <div>
     <h1>Inventaire RFID</h1>
-    <p>ISO 28560-2 · ISO 15693 · NXP ICODE SLIX2</p>
+    <p>Nedap · Bibliomondo · ISO 28560-2 · SLIX2</p>
   </div>
   <div class="status-badge warn" id="nfc-status">NFC</div>
 </header>
 
 <main>
 
-  <!-- Compatibility warning -->
   <div class="compat-warn" id="compat-warn" style="display:none">
     <strong>⚠ Compatibilité Web NFC</strong>
-    L'API Web NFC nécessite Chrome sur Android (v89+). 
-    Ouvrez cette page dans <strong>Chrome</strong> sur votre smartphone Android, 
-    activez le NFC dans les paramètres, et assurez-vous que le site est servi en HTTPS.
+    Nécessite <strong>Chrome sur Android (v89+)</strong> servi en HTTPS.
+    iOS et Firefox ne sont pas supportés. Activez le NFC dans les paramètres Android.
   </div>
 
-  <!-- Session stats -->
   <div class="session-bar">
-    <div class="info-item">
-      <span>Scannés</span>
-      <span id="count-total">0</span>
-    </div>
-    <div class="info-item">
-      <span>Uniques</span>
-      <span id="count-unique">0</span>
-    </div>
-    <div class="info-item">
-      <span>Doublons</span>
-      <span id="count-dup" style="color:var(--warn)">0</span>
-    </div>
-    <div class="info-item">
-      <span>Session</span>
-      <span id="session-time">00:00</span>
-    </div>
+    <div class="info-item"><span>Scannés</span><span id="count-total">0</span></div>
+    <div class="info-item"><span>Uniques</span><span id="count-unique">0</span></div>
+    <div class="info-item"><span>Doublons</span><span id="count-dup" style="color:var(--warn)">0</span></div>
+    <div class="info-item"><span>Session</span><span id="session-time">00:00</span></div>
   </div>
 
-  <!-- Scan zone -->
   <div class="scan-zone" id="scan-zone" onclick="toggleScan()">
     <div class="rfid-icon">
       <div class="pulse-ring"></div>
       <div class="pulse-ring"></div>
       <div class="pulse-ring"></div>
-      <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" id="rfid-svg">
-        <!-- RFID waves -->
-        <circle cx="30" cy="30" r="6" fill="var(--accent)" id="rfid-center"/>
+      <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="6" fill="var(--accent)"/>
         <path d="M18 30 a12 12 0 0 1 12-12" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
         <path d="M18 30 a12 12 0 0 0 12 12" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
         <path d="M42 30 a12 12 0 0 0-12-12" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
@@ -529,23 +135,18 @@
     <div class="last-scan" id="last-scan">Approchez un tag RFID du lecteur NFC</div>
   </div>
 
-  <!-- Start/Stop button -->
   <div class="controls">
-    <button class="btn primary" id="btn-scan" onclick="toggleScan()">
-      ▶ Démarrer le scan
-    </button>
+    <button class="btn primary" id="btn-scan" onclick="toggleScan()">▶ Démarrer le scan</button>
   </div>
 
-  <!-- Manual entry -->
   <div class="manual-row">
-    <input type="text" class="manual-input" id="manual-ref" 
-           placeholder="Saisie manuelle de référence..." 
+    <input type="text" class="manual-input" id="manual-ref"
+           placeholder="Saisie manuelle de référence..."
            autocomplete="off" autocorrect="off" autocapitalize="off"
            onkeydown="if(event.key==='Enter') addManual()"/>
-    <button class="btn" onclick="addManual()" style="white-space:nowrap; min-width:70px">+ Ajouter</button>
+    <button class="btn" onclick="addManual()" style="white-space:nowrap;min-width:70px">+ Ajouter</button>
   </div>
 
-  <!-- Log -->
   <div class="log-header">
     <h2>Références scannées</h2>
     <span class="log-count" id="log-count">0 entrée(s)</span>
@@ -554,14 +155,14 @@
     <div class="log-empty">Aucune référence — commencez le scan</div>
   </div>
 
-  <!-- Export & Actions -->
+  <details class="debug-panel">
+    <summary>▸ Débogage dernier tag lu</summary>
+    <div class="debug-content" id="debug-content">—</div>
+  </details>
+
   <div class="footer-actions">
-    <button class="btn success" onclick="exportTxt()">
-      ↓ Export .TXT
-    </button>
-    <button class="btn danger" onclick="clearAll()">
-      ✕ Effacer tout
-    </button>
+    <button class="btn success" onclick="exportTxt()">↓ Export .TXT</button>
+    <button class="btn danger"  onclick="clearAll()">✕ Effacer tout</button>
   </div>
 
 </main>
@@ -569,8 +170,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── State ────────────────────────────────────────────────
-let references = [];        // [{ref, time, uid}]
+// ── State ─────────────────────────────────────────────────────────────
+let references = [];
 let scanning = false;
 let nfcReader = null;
 let sessionStart = null;
@@ -579,21 +180,14 @@ let totalScans = 0;
 let dupCount = 0;
 let abortController = null;
 
-// ── NFC Compatibility check ──────────────────────────────
+// ── Compatibilité NFC ─────────────────────────────────────────────────
 function checkCompat() {
   const badge = document.getElementById('nfc-status');
-  const warn = document.getElementById('compat-warn');
-
+  const warn  = document.getElementById('compat-warn');
   if (!('NDEFReader' in window)) {
     badge.className = 'status-badge err';
     badge.textContent = 'Sans NFC';
     warn.style.display = 'block';
-
-    // Disable scan button if absolutely no NFC
-    const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
-    if (!isHttps) {
-      warn.innerHTML = '<strong>⚠ HTTPS requis</strong>L\'API Web NFC nécessite HTTPS. Servez cette page via un serveur HTTPS (ou localhost).';
-    }
     return false;
   }
   badge.className = 'status-badge ok';
@@ -601,173 +195,116 @@ function checkCompat() {
   return true;
 }
 
-// ── ISO 28560-2 Parser ───────────────────────────────────
-// Parses NDEF records from NXP ICODE SLIX2 tags (ISO 15693)
-// Returns the primary item identifier (reference document)
-function parseISO28560(message) {
-  if (!message || !message.records || message.records.length === 0) return null;
+// ── Parseur Nedap / Bibliomondo (ISO 28560-2 sur ICODE SLIX2) ─────────
+//
+//  Structure mémoire (blocs de 4 octets) :
+//    Bloc 00 : 0x11  0x04  [octet A]  [octet B]
+//    Bloc 01 : [octet C]  [octet D]  0x02  0x01
+//
+//  Numéro de document Bibliomondo = uint32 big-endian : A B C D
+//
+//  Validé sur 3 tags de la Médiathèque Jacques Baumel (Rueil-Malmaison) :
+//    05 0A FA 2B → 84 605 483  ✓
+//    05 09 50 9C → 84 496 540  ✓
+//    05 09 61 A8 → 84 500 904  ✓
+
+function parseNedapBibliomondo(bytes) {
+  // bytes : Uint8Array contenant les blocs mémoire concaténés
+  if (!bytes || bytes.length < 8) return null;
+
+  // Vérification de la signature Nedap ISO 28560-2
+  // (on accepte aussi sans vérification stricte pour tolérance)
+  const signatureOk = (bytes[0] === 0x11 && bytes[1] === 0x04);
+
+  // Octets du numéro de document : positions [2][3][4][5]
+  const A = bytes[2];  // bloc00, octet 2
+  const B = bytes[3];  // bloc00, octet 3
+  const C = bytes[4];  // bloc01, octet 0
+  const D = bytes[5];  // bloc01, octet 1
+
+  // Assemblage big-endian 32 bits non signé
+  const docNum = ((A << 24) | (B << 16) | (C << 8) | D) >>> 0;
+
+  if (docNum === 0) return null;
+
+  return {
+    docNum: String(docNum),
+    signatureOk,
+    rawHex: [A,B,C,D].map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(' ')
+  };
+}
+
+// ── Extraction des bytes depuis un message NDEF ───────────────────────
+function extractBytesFromNDEF(message) {
+  if (!message || !message.records) return null;
 
   for (const record of message.records) {
     try {
-      // ISO 28560-2: NDEF records contain TLV-encoded data
-      // Primary item identifier is Object Identifier (OID) field
-      if (record.recordType === 'unknown' || record.recordType === 'mime' || record.mediaType) {
-        const raw = new Uint8Array(record.data.buffer);
-        const ref = parseISO28560Raw(raw);
-        if (ref) return ref;
-      }
+      if (!record.data || record.data.byteLength < 6) continue;
 
-      // Try text records (some libraries encode as plain text)
-      if (record.recordType === 'text') {
-        const decoder = new TextDecoder(record.encoding || 'utf-8');
-        const text = decoder.decode(record.data);
-        if (text && text.trim().length > 0) return text.trim();
-      }
+      const raw = new Uint8Array(
+        record.data.buffer,
+        record.data.byteOffset,
+        record.data.byteLength
+      );
 
-      // Try URL records
-      if (record.recordType === 'url') {
-        const url = record.toText ? record.toText() : '';
-        if (url) return url;
+      const result = parseNedapBibliomondo(raw);
+      if (result) {
+        return { ...result, method: 'NDEF-bloc-brut', recordType: record.recordType };
       }
-
-      // Fallback: raw bytes → hex string (UID based)
-      if (record.data && record.data.byteLength > 0) {
-        const raw = new Uint8Array(record.data.buffer);
-        const ref = parseISO28560Raw(raw);
-        if (ref) return ref;
-      }
-    } catch (e) {
-      console.warn('Record parse error:', e);
+    } catch(e) {
+      console.warn('Erreur record NDEF:', e);
     }
   }
   return null;
 }
 
-function parseISO28560Raw(bytes) {
-  // ISO 28560-2 Block structure:
-  // Byte 0: OID block length
-  // Bytes 1-n: OID (Object IDentifier = item reference)
-  // Followed by optional data elements
-
-  if (!bytes || bytes.length < 2) return null;
-
-  // Check for standard TLV (Tag-Length-Value) structure
-  // Tag 0x01 = Primary Item Identifier in ISO 28560-2
-  let i = 0;
-  while (i < bytes.length - 1) {
-    const tag = bytes[i];
-    const len = bytes[i + 1];
-
-    if (len === 0 || i + 2 + len > bytes.length) break;
-
-    const value = bytes.slice(i + 2, i + 2 + len);
-
-    if (tag === 0x01 || tag === 0x11) {
-      // Primary item identifier
-      const text = bytesToAscii(value);
-      if (text && text.trim().length >= 2) return text.trim();
-    }
-
-    i += 2 + len;
-    if (tag === 0x00) { i = 1; continue; } // alignment
-  }
-
-  // Try ISO 28560-2 fixed-length block (older implementations)
-  // Block 0: Content Parameter (1 byte) + OID (various)
-  if (bytes.length >= 4) {
-    // Skip first byte (content parameter), read until null or end
-    const slice = bytes.slice(1, Math.min(17, bytes.length));
-    const text = bytesToAscii(slice);
-    if (text && text.trim().length >= 3 && isPrintable(text)) {
-      return text.trim().replace(/\x00/g, '').trim();
-    }
-  }
-
-  // Last resort: full hex representation of UID-like data
-  const hex = Array.from(bytes.slice(0, Math.min(8, bytes.length)))
-    .map(b => b.toString(16).padStart(2, '0').toUpperCase())
-    .join('');
-  return hex.length >= 4 ? 'UID:' + hex : null;
-}
-
-function bytesToAscii(bytes) {
-  return Array.from(bytes)
-    .filter(b => b !== 0x00)
-    .map(b => String.fromCharCode(b))
-    .join('');
-}
-
-function isPrintable(str) {
-  return /^[\x20-\x7E\x80-\xFF]+$/.test(str.replace(/\x00/g, ''));
-}
-
-// ── NFC Scan logic ───────────────────────────────────────
+// ── Gestion NFC ───────────────────────────────────────────────────────
 async function toggleScan() {
-  if (scanning) {
-    stopScan();
-  } else {
-    await startScan();
-  }
+  if (scanning) stopScan(); else await startScan();
 }
 
 async function startScan() {
-  if (!checkCompat()) {
-    showToast('⚠ Web NFC non disponible sur ce navigateur');
-    return;
-  }
+  if (!checkCompat()) { showToast('⚠ Web NFC non disponible'); return; }
 
   try {
     nfcReader = new NDEFReader();
     abortController = new AbortController();
-
     await nfcReader.scan({ signal: abortController.signal });
 
     scanning = true;
     setScanState('scanning');
     document.getElementById('btn-scan').textContent = '■ Arrêter le scan';
     document.getElementById('btn-scan').classList.add('active');
-
-    if (!sessionStart) {
-      sessionStart = Date.now();
-      startTimer();
-    }
+    if (!sessionStart) { sessionStart = Date.now(); startTimer(); }
 
     nfcReader.addEventListener('reading', ({ message, serialNumber }) => {
       handleNFCReading(message, serialNumber);
     });
 
     nfcReader.addEventListener('readingerror', () => {
-      showToast('❌ Erreur de lecture — vérifiez le tag');
+      showToast('❌ Erreur de lecture');
       setScanState('error');
       setTimeout(() => { if (scanning) setScanState('scanning'); }, 1500);
     });
 
     showToast('✓ NFC activé — approchez un tag');
 
-  } catch (err) {
+  } catch(err) {
     scanning = false;
     setScanState('');
     document.getElementById('btn-scan').textContent = '▶ Démarrer le scan';
     document.getElementById('btn-scan').classList.remove('active');
-
-    if (err.name === 'NotAllowedError') {
-      showToast('⚠ Permission NFC refusée');
-    } else if (err.name === 'NotSupportedError') {
-      showToast('⚠ NFC non supporté sur cet appareil');
-    } else {
-      showToast('❌ Erreur NFC: ' + err.message);
-    }
+    if (err.name === 'NotAllowedError')        showToast('⚠ Permission NFC refusée');
+    else if (err.name === 'NotSupportedError') showToast('⚠ NFC non supporté');
+    else showToast('❌ ' + err.message);
     console.error('NFC error:', err);
   }
 }
 
 function stopScan() {
-  if (abortController) {
-    abortController.abort();
-    abortController = null;
-  }
-  scanning = false;
-  nfcReader = null;
+  if (abortController) { abortController.abort(); abortController = null; }
+  scanning = false; nfcReader = null;
   setScanState('');
   document.getElementById('btn-scan').textContent = '▶ Démarrer le scan';
   document.getElementById('btn-scan').classList.remove('active');
@@ -779,196 +316,170 @@ function stopScan() {
 function handleNFCReading(message, serialNumber) {
   totalScans++;
 
-  // Try to parse ISO 28560-2 reference
-  let ref = parseISO28560(message);
+  let ref = null;
+  let debugInfo = [];
 
-  // Fallback to serial number (UID) if no NDEF data decoded
-  if (!ref && serialNumber) {
-    ref = 'UID:' + serialNumber.toUpperCase().replace(/:/g, '');
+  // Tentative décodage Nedap/Bibliomondo
+  const parsed = extractBytesFromNDEF(message);
+
+  if (parsed && parsed.docNum) {
+    ref = parsed.docNum;
+    debugInfo = [
+      ['N° document',   parsed.docNum],
+      ['Octets A B C D', parsed.rawHex],
+      ['Signature 11:04', parsed.signatureOk ? 'OK ✓' : 'absente'],
+      ['Méthode',        parsed.method],
+      ['Type record',    parsed.recordType],
+      ['UID tag',        serialNumber || '—'],
+      ['Nb records',     message?.records?.length ?? 0],
+    ];
+  } else {
+    // Fallback : affichage UID
+    const uid = serialNumber ? serialNumber.toUpperCase().replace(/:/g,'') : null;
+    ref = uid ? 'UID:' + uid : 'TAG-' + Date.now().toString(36).toUpperCase();
+    debugInfo = [
+      ['Résultat',    'Parseur Nedap : échec'],
+      ['Fallback',    ref],
+      ['UID tag',     serialNumber || '—'],
+      ['Nb records',  message?.records?.length ?? 0],
+      ['Conseil',    'Vérifiez que le tag est un SLIX2 Nedap'],
+    ];
   }
 
-  if (!ref) {
-    ref = 'TAG-' + Date.now().toString(36).toUpperCase();
-  }
+  updateDebug(debugInfo);
 
+  // Détection doublon
   const isDuplicate = references.some(r => r.ref === ref);
-
   if (isDuplicate) {
-    dupCount++;
-    updateStats();
+    dupCount++; updateStats();
     setScanState('duplicate');
     document.getElementById('last-scan').textContent = '⚠ DOUBLON: ' + ref;
-    showToast('⚠ Doublon: ' + ref.substring(0, 30));
+    showToast('⚠ Doublon: ' + ref);
     setTimeout(() => { if (scanning) setScanState('scanning'); }, 2000);
     return;
   }
 
-  // Add new reference
-  const entry = {
-    ref: ref,
-    time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+  // Ajout
+  references.unshift({
+    ref,
+    time: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' }),
     uid: serialNumber || ''
-  };
-
-  references.unshift(entry); // newest first in UI
-  updateStats();
-  renderLog();
+  });
+  updateStats(); renderLog();
   setScanState('success');
-
   document.getElementById('last-scan').textContent = '✓ ' + ref;
-  showToast('✓ Ajouté: ' + ref.substring(0, 35));
-
-  // Vibrate feedback
+  showToast('✓ ' + ref);
   if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
-
   setTimeout(() => { if (scanning) setScanState('scanning'); }, 1500);
 }
 
-// ── Manual entry ─────────────────────────────────────────
+// ── Saisie manuelle ────────────────────────────────────────────────────
 function addManual() {
   const input = document.getElementById('manual-ref');
   const ref = input.value.trim();
   if (!ref) { showToast('Saisir une référence'); return; }
-
-  const isDuplicate = references.some(r => r.ref === ref);
-  if (isDuplicate) {
+  if (references.some(r => r.ref === ref)) {
     showToast('⚠ Doublon: ' + ref);
-    dupCount++;
-    totalScans++;
-    updateStats();
-    return;
+    dupCount++; totalScans++; updateStats(); return;
   }
-
-  const entry = {
-    ref: ref,
-    time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+  references.unshift({
+    ref,
+    time: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' }),
     uid: 'MANUEL'
-  };
-  references.unshift(entry);
-  totalScans++;
-  updateStats();
-  renderLog();
+  });
+  totalScans++; updateStats(); renderLog();
   input.value = '';
   showToast('✓ Ajouté manuellement');
   if (navigator.vibrate) navigator.vibrate(40);
 }
 
-// ── UI helpers ───────────────────────────────────────────
+// ── UI helpers ─────────────────────────────────────────────────────────
 function setScanState(state) {
-  const zone = document.getElementById('scan-zone');
-  const label = document.getElementById('scan-label');
-  zone.className = 'scan-zone' + (state ? ' ' + state : '');
-
-  const labels = {
-    scanning: 'Scan en cours...',
-    success: 'Tag lu avec succès !',
-    duplicate: 'Doublon détecté !',
-    error: 'Erreur de lecture',
-    '': 'Appuyer pour activer le scan'
-  };
-  label.textContent = labels[state] || labels[''];
+  document.getElementById('scan-zone').className = 'scan-zone' + (state ? ' '+state : '');
+  const labels = { scanning:'Scan en cours...', success:'Tag lu !', duplicate:'Doublon !', error:'Erreur de lecture', '':'Appuyer pour activer le scan' };
+  document.getElementById('scan-label').textContent = labels[state] ?? labels[''];
 }
 
 function renderLog() {
   const list = document.getElementById('log-list');
   const count = document.getElementById('log-count');
-
   if (references.length === 0) {
     list.innerHTML = '<div class="log-empty">Aucune référence — commencez le scan</div>';
-    count.textContent = '0 entrée(s)';
-    return;
+    count.textContent = '0 entrée(s)'; return;
   }
-
   count.textContent = references.length + ' entrée(s)';
-
-  // Show newest first in UI, but export will be in scan order
-  list.innerHTML = references.map((entry, i) => `
+  list.innerHTML = references.map((e,i) => `
     <div class="log-item">
       <span class="log-num">${references.length - i}</span>
-      <span class="log-ref">${escapeHtml(entry.ref)}</span>
-      <span class="log-time">${entry.time}</span>
-      <button class="log-del" onclick="deleteEntry(${i})" title="Supprimer">✕</button>
-    </div>
-  `).join('');
+      <span class="log-ref">${escapeHtml(e.ref)}</span>
+      <span class="log-time">${e.time}</span>
+      <button class="log-del" onclick="deleteEntry(${i})">✕</button>
+    </div>`).join('');
 }
 
-function deleteEntry(idx) {
-  references.splice(idx, 1);
-  updateStats();
-  renderLog();
-}
+function deleteEntry(idx) { references.splice(idx,1); updateStats(); renderLog(); }
 
 function updateStats() {
-  document.getElementById('count-total').textContent = totalScans;
+  document.getElementById('count-total').textContent  = totalScans;
   document.getElementById('count-unique').textContent = references.length;
-  document.getElementById('count-dup').textContent = dupCount;
+  document.getElementById('count-dup').textContent    = dupCount;
+}
+
+function updateDebug(info) {
+  document.getElementById('debug-content').innerHTML = info.map(([k,v]) =>
+    `<div><span style="color:var(--accent2)">${k}:</span> ${escapeHtml(String(v))}</div>`
+  ).join('');
 }
 
 function startTimer() {
   timerInterval = setInterval(() => {
     if (!sessionStart) return;
-    const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
-    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
-    const s = String(elapsed % 60).padStart(2, '0');
-    document.getElementById('session-time').textContent = m + ':' + s;
+    const s = Math.floor((Date.now() - sessionStart) / 1000);
+    document.getElementById('session-time').textContent =
+      String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
   }, 1000);
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// ── Export ───────────────────────────────────────────────
+// ── Export TXT ─────────────────────────────────────────────────────────
 function exportTxt() {
-  if (references.length === 0) {
-    showToast('Aucune référence à exporter');
-    return;
-  }
-
-  // Export in chronological order (reverse of display)
-  const lines = [...references].reverse().map(e => e.ref);
-  const content = lines.join('\n');
+  if (references.length === 0) { showToast('Aucune référence à exporter'); return; }
+  const content = [...references].reverse().map(e => e.ref).join('\n');
   const now = new Date();
-  const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
-  const timeStr = now.toTimeString().slice(0,5).replace(':','');
-  const filename = `inventaire_${dateStr}_${timeStr}.txt`;
-
-  // Use modern download API
+  const filename = 'inventaire_'
+    + now.toISOString().slice(0,10).replace(/-/g,'')
+    + '_' + now.toTimeString().slice(0,5).replace(':','')
+    + '.txt';
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
-
-  showToast(`✓ Export: ${filename} (${references.length} refs)`);
+  showToast('✓ ' + filename + ' — ' + references.length + ' réf.');
 }
 
 function clearAll() {
   if (references.length === 0) { showToast('Liste déjà vide'); return; }
-  if (!confirm(`Effacer ${references.length} référence(s) ?`)) return;
-  references = [];
-  totalScans = 0;
-  dupCount = 0;
-  sessionStart = null;
-  clearInterval(timerInterval);
+  if (!confirm('Effacer ' + references.length + ' référence(s) ?')) return;
+  references = []; totalScans = 0; dupCount = 0;
+  sessionStart = null; clearInterval(timerInterval);
   document.getElementById('session-time').textContent = '00:00';
   document.getElementById('last-scan').textContent = 'Approchez un tag RFID du lecteur NFC';
-  updateStats();
-  renderLog();
+  document.getElementById('debug-content').innerHTML = '—';
+  updateStats(); renderLog();
   showToast('Liste effacée');
 }
 
-// ── Init ─────────────────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────────────────
 checkCompat();
 renderLog();
 updateStats();
